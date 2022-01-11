@@ -1,0 +1,13 @@
+example:
+  property: I AM THE DEFAULT
+management:
+  endpoints:
+     web:
+       exposure:
+          include: info,health,beans,env
+     enabled-by-default: true
+  endpoint:
+     health:
+       show-details: always
+server:
+  port: 8081
