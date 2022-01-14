@@ -14,3 +14,54 @@ eureka:
       fetchRegistry: true
       serviceUrl: 
          defaultZone: http://localhost:8070/eureka/
+
+management.health.circuitbreakers.enabled: true #To show Circuit Breaker status
+
+resilience4j.circuitbreaker:
+  instances:
+    licenseService:
+      registerHealthIndicator: true
+      ringBufferSizeInClosedState: 5
+      ringBufferSizeInHalfOpenState: 3
+      waitDurationInOpenState: 10s
+      failureRateThreshold: 20 # Circuit will open if 50% calls are failed
+      recordExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+        - java.io.IOException
+        - java.util.concurrent.TimeoutException
+        - org.springframework.web.client.ResourceAccessException
+    organizationService:
+      registerHealthIndicator: true
+      ringBufferSizeInClosedState: 6
+      ringBufferSizeInHalfOpenState: 4
+      waitDurationInOpenState: 20s
+      failureRateThreshold: 60
+
+resilience4j.bulkhead:
+    instances:
+      bulkheadLicenseService:
+        maxWaitDuration: 10ms #maximum amount of time to block a thread
+        maxConcurrentCalls: 20 #The maximum number of concurrent calls
+
+resilience4j.thread-pool-bulkhead:
+    instances:
+       bulkheadLicenseService:
+         maxThreadPoolSize: 1 #The maximum number of threads in the thread pool
+         coreThreadPoolSize: 1 #The core thread pool size
+         queueCapacity: 1 #The queue’s capacity
+         keepAliveDuration: 20ms #The maximum time that idle threads wait for new tasks before terminating
+
+resilience4j.retry:
+   instances:
+      retryLicenseService:
+         maxRetryAttempts: 3 # maximum number of retry attempt
+         waitDuration: 10000 
+         retry-exceptions:
+            - java.util.concurrent.TimeoutException 
+
+resilience4j.ratelimiter:
+   instances:
+      licenseService:
+         timeoutDuration: 1000ms
+         limitRefreshPeriod: 5000 
+         limitForPeriod: 5                                      
